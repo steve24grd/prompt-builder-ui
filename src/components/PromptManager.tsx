@@ -14,33 +14,76 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
         // Removed updateCachedFileTrees(rootDir) as it's not used in the provided code edit
     }, [rootDir]);
 
-    const handleAppend = () => {
+    const handleAppend = async () => {
         if (!rootDir) {
             alert('Please set the root directory first.');
             return;
         }
-        const fileArr = files
-            .split('\n')
-            .map(f => f.trim())
-            .filter(Boolean);
 
-        fetch('http://localhost:4000/api/append-to-prompt', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rootDir, files: fileArr }),
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.totalTokens !== undefined) {
-                    setTokenCount(data.totalTokens);
-                } else if (data.error) {
-                    alert(`Error: ${data.error}`);
-                }
+        try {
+            // Reconstruct prompt by replacing tags with cached content
+            let reconstructedPrompt = files;
+            
+            // Replace <file_trees> with cached file trees
+            if (reconstructedPrompt.includes('<file_trees>')) {
+                reconstructedPrompt = reconstructedPrompt.replace(/<file_trees>/g, cachedFileTrees || '');
+            }
+
+            // Replace <retrieved_files> with cached retrieved files
+            if (reconstructedPrompt.includes('<retrieved_files>')) {
+                const retrievedFiles = localStorage.getItem('retrievedFiles') || '';
+                reconstructedPrompt = reconstructedPrompt.replace(/<retrieved_files>/g, retrievedFiles);
+            }
+
+            // Replace <custom_instructions> with cached custom instructions
+            if (reconstructedPrompt.includes('<custom_instructions>')) {
+                const customInstructions = localStorage.getItem('customInstructions') || '';
+                reconstructedPrompt = reconstructedPrompt.replace(/<custom_instructions>/g, customInstructions);
+            }
+
+            // Save using File System Access API
+            if ('showSaveFilePicker' in window) {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: 'prompt.txt',
+                    types: [{
+                        description: 'Text Files',
+                        accept: { 'text/plain': ['.txt'] },
+                    }],
+                });
+                const writable = await handle.createWritable();
+                await writable.write(reconstructedPrompt);
+                await writable.close();
+                alert('Successfully saved prompt.txt');
+            } else {
+                // Fallback for browsers that don't support File System Access API
+                const blob = new Blob([reconstructedPrompt], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'prompt.txt';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
+
+            // Update token count
+            fetch('http://localhost:4000/api/count-tokens', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: reconstructedPrompt }),
             })
-            .catch(err => {
-                console.error(err);
-                alert(`Failed to append: ${err.message}`);
-            });
+                .then(res => res.json())
+                .then(data => {
+                    if (data.tokenCount !== undefined) {
+                        setTokenCount(data.tokenCount);
+                    }
+                });
+
+        } catch (err) {
+            console.error(err);
+            alert(`Failed to save prompt: ${err instanceof Error ? err.message : 'Unknown error occurred'}`);
+        }
     };
 
     const handleRefreshCount = () => {
@@ -87,19 +130,20 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
                 )}
             </div>
 
-            <p>Enter files to append to prompt.txt (one per line)</p>
+            <p>Compose your prompt here by including <b>{`<file_trees>, <retrieved_files>, and <custom_instructions>`}</b> to embed additional context</p>
             <textarea
                 rows={5}
                 cols={50}
                 value={files}
                 onChange={e => setFiles(e.target.value)}
-                placeholder="file1.js
-file2.ts
-src/components/Hello.tsx
+                placeholder="Example:
+<file_trees>
+<retrieved_files>
+<custom_instructions>
 "
             />
             <br />
-            <button onClick={handleAppend}>Append to Prompt</button>
+            <button onClick={handleAppend}>Save to prompt.txt</button>
             <button style={{ marginLeft: '10px' }} onClick={handleRefreshCount}>
                 Refresh Token Count
             </button>
