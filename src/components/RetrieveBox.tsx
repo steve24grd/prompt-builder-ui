@@ -32,6 +32,22 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
             });
     };
 
+    const handleSaveToFile = () => {
+        if (!output) {
+            alert('Please retrieve content first before saving.');
+            return;
+        }
+
+        const file = new Blob([output], { type: 'text/plain' });
+        const element = document.createElement('a');
+        element.href = URL.createObjectURL(file);
+        element.download = 'extract.txt';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+        URL.revokeObjectURL(element.href);
+    };
+
     return (
         <div>
             <h2>Retrieve Files</h2>
@@ -43,7 +59,10 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
                 placeholder="Enter one file path per line..."
             />
             <br />
-            <button onClick={handleRetrieve}>Retrieve & Append to extract.txt</button>
+            <div style={{ marginTop: '1rem' }}>
+                <button onClick={handleRetrieve} style={{ marginRight: '1rem' }}>Retrieve</button>
+                <button onClick={handleSaveToFile}>Save to extract.txt</button>
+            </div>
 
             {output && (
                 <div style={{ marginTop: '1rem' }}>
