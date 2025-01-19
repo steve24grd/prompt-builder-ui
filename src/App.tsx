@@ -9,7 +9,7 @@ const App: React.FC = () => {
 
     return (
         <div style={{ margin: '20px' }}>
-            <h1>Repo Oracle (TypeScript + React)</h1>
+            <h1>Prompt Builder (TypeScript + React)</h1>
             <DirectorySelector rootDir={rootDir} onRootDirChange={setRootDir} />
 
             <DirectoryView rootDir={rootDir} />
