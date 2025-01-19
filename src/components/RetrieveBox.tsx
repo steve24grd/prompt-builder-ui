@@ -82,6 +82,10 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
     return (
         <div>
             <h2>Retrieve Files</h2>
+            <div style={{ marginBottom: '1rem' }}>
+                <button onClick={handleRetrieve} style={{ marginRight: '1rem' }}>Retrieve</button>
+                <button onClick={handleSaveToFile}>Save to extract.txt</button>
+            </div>
             <textarea
                 rows={5}
                 cols={50}
@@ -90,10 +94,6 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
                 placeholder="Enter one file path per line..."
             />
             <br />
-            <div style={{ marginTop: '1rem' }}>
-                <button onClick={handleRetrieve} style={{ marginRight: '1rem' }}>Retrieve</button>
-                <button onClick={handleSaveToFile}>Save to extract.txt</button>
-            </div>
 
             {output && (
                 <div style={{ marginTop: '1rem' }}>
