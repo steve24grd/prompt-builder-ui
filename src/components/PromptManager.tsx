@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useCacheContext } from '../context/CacheContext';
 
 interface Props {
     rootDir: string;
@@ -7,6 +8,11 @@ interface Props {
 const PromptManager: React.FC<Props> = ({ rootDir }) => {
     const [files, setFiles] = useState('');
     const [tokenCount, setTokenCount] = useState(0);
+    const { cachedFileTrees } = useCacheContext();
+
+    useEffect(() => {
+        // Removed updateCachedFileTrees(rootDir) as it's not used in the provided code edit
+    }, [rootDir]);
 
     const handleAppend = () => {
         if (!rootDir) {
@@ -61,6 +67,26 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
     return (
         <div>
             <h2>Prompt Manager</h2>
+
+            <h3>Cached Context</h3>
+            <div style={{ marginBottom: '20px' }}>
+                {cachedFileTrees ? (
+                    <pre style={{ 
+                        maxHeight: '200px', 
+                        overflow: 'auto', 
+                        backgroundColor: '#f5f5f5', 
+                        padding: '10px',
+                        marginBottom: '20px',
+                        whiteSpace: 'pre-wrap',
+                        wordWrap: 'break-word'
+                    }}>
+                        {cachedFileTrees}
+                    </pre>
+                ) : (
+                    <p style={{ color: '#666', fontStyle: 'italic' }}>No cached content</p>
+                )}
+            </div>
+
             <p>Enter files to append to prompt.txt (one per line)</p>
             <textarea
                 rows={5}

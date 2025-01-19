@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useCacheContext } from '../context/CacheContext';
 
 interface Props {
     rootDir: string;
@@ -6,6 +7,8 @@ interface Props {
 
 const DirectoryView: React.FC<Props> = ({ rootDir }) => {
     const [directoryTree, setDirectoryTree] = useState('');
+    const [addToContext, setAddToContext] = useState(false);
+    const { setCachedFileTrees } = useCacheContext();
 
     useEffect(() => {
         if (!rootDir) return;
@@ -28,6 +31,16 @@ const DirectoryView: React.FC<Props> = ({ rootDir }) => {
                 alert(`Failed to fetch directory tree: ${err.message}`);
             });
     }, [rootDir]);
+
+    const handleAddToContextChange = (checked: boolean) => {
+        if (!directoryTree) {
+            alert('No directory structure available to add to context.');
+            return;
+        }
+
+        setAddToContext(checked);
+        setCachedFileTrees(checked ? `# file_trees\n${directoryTree}` : '');
+    };
 
     const handleSaveDirectoryStructure = async () => {
         if (!directoryTree) {
@@ -77,7 +90,16 @@ const DirectoryView: React.FC<Props> = ({ rootDir }) => {
     return (
         <div>
             <h2>File Trees</h2>
-            <button onClick={handleSaveDirectoryStructure} style={{ marginBottom: '1rem' }}>Save to file_trees.txt</button>
+            <div style={{ marginBottom: '1rem' }}>
+                <button onClick={handleSaveDirectoryStructure}>Save to file_trees.txt</button>
+                <label style={{ marginLeft: '10px' }}>
+                    <input 
+                        type="checkbox" 
+                        checked={addToContext} 
+                        onChange={(e) => handleAddToContextChange(e.target.checked)}
+                    /> Add to context
+                </label>
+            </div>
             <pre>{directoryTree}</pre>
         </div>
     );
