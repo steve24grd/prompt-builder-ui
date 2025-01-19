@@ -1,4 +1,5 @@
 import React, { useState, ChangeEvent } from 'react';
+import { useCacheContext } from '../context/CacheContext';
 
 interface Props {
     rootDir: string;
@@ -9,6 +10,8 @@ const CustomInstructionBox: React.FC<Props> = ({ rootDir }) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [fileContent, setFileContent] = useState('');
     const [newInstruction, setNewInstruction] = useState('');
+    const [addToContext, setAddToContext] = useState(false);
+    const { cachedFileTrees, setCachedFileTrees } = useCacheContext();
 
     const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -53,6 +56,22 @@ const CustomInstructionBox: React.FC<Props> = ({ rootDir }) => {
         } catch (err) {
             console.error(err);
             alert('Failed to save custom instructions');
+        }
+    };
+
+    const handleAddToContextChange = (checked: boolean) => {
+        setAddToContext(checked);
+        const content = instructionType === 'file' ? fileContent : newInstruction;
+        
+        if (checked && content) {
+            const newContent = cachedFileTrees + '\n\n# Custom Instructions\n' + content;
+            setCachedFileTrees(newContent);
+        } else if (!checked) {
+            // Remove the "Custom Instructions" section when unchecked
+            const sections = cachedFileTrees.split('\n\n# ');
+            const filteredSections = sections.filter(section => !section.startsWith('Custom Instructions\n'));
+            const newContent = filteredSections.join('\n\n# ').trim();
+            setCachedFileTrees(newContent === '' ? '' : sections[0] === newContent ? newContent : '# ' + newContent);
         }
     };
 
@@ -118,6 +137,16 @@ const CustomInstructionBox: React.FC<Props> = ({ rootDir }) => {
                     </button>
                 </div>
             )}
+            <div style={{ marginTop: '10px' }}>
+                <label>
+                    <input
+                        type="checkbox"
+                        checked={addToContext}
+                        onChange={(e) => handleAddToContextChange(e.target.checked)}
+                    />
+                    Add to Context
+                </label>
+            </div>
         </div>
     );
 };
