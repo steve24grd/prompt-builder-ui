@@ -32,20 +32,51 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
             });
     };
 
-    const handleSaveToFile = () => {
-        if (!output) {
-            alert('Please retrieve content first before saving.');
+    const handleSaveToFile = async () => {
+        if (!rootDir) {
+            alert('Please set the root directory first.');
             return;
         }
 
-        const file = new Blob([output], { type: 'text/plain' });
-        const element = document.createElement('a');
-        element.href = URL.createObjectURL(file);
-        element.download = 'extract.txt';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-        URL.revokeObjectURL(element.href);
+        try {
+            // Check if File System Access API is supported
+            if ('showDirectoryPicker' in window) {
+                try {
+                    // Ask user to select a directory
+                    const dirHandle = await window.showDirectoryPicker();
+                    
+                    // Create a new file in the selected directory
+                    const fileHandle = await dirHandle.getFileHandle('extract.txt', { create: true });
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(output);
+                    await writable.close();
+                    
+                    alert('Successfully saved to the selected directory');
+                } catch (err) {
+                    // If user cancels directory selection or permission denied, fall back to download
+                    console.warn('Directory access failed, falling back to download:', err);
+                    fallbackDownload();
+                }
+            } else {
+                // Fall back to regular download for unsupported browsers
+                fallbackDownload();
+            }
+        } catch (err) {
+            console.error(err);
+            alert(`Failed to save file: ${err instanceof Error ? err.message : 'Unknown error occurred'}`);
+        }
+    };
+
+    const fallbackDownload = () => {
+        const blob = new Blob([output], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'extract.txt';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+        alert('File download started');
     };
 
     return (
