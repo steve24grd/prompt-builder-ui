@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useCacheContext } from '../context/CacheContext';
 
 interface Props {
     rootDir: string;
@@ -7,6 +8,8 @@ interface Props {
 const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
     const [pathsText, setPathsText] = useState('');
     const [output, setOutput] = useState('');
+    const [addToContext, setAddToContext] = useState(false);
+    const { cachedFileTrees, setCachedFileTrees } = useCacheContext();
 
     const handleRetrieve = () => {
         if (!rootDir) {
@@ -30,6 +33,20 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
                 console.error(err);
                 alert(`Failed to retrieve: ${err.message}`);
             });
+    };
+
+    const handleAddToContextChange = (checked: boolean) => {
+        setAddToContext(checked);
+        if (checked && output) {
+            const newContent = cachedFileTrees + '\n\n# Retrieved Files\n' + output;
+            setCachedFileTrees(newContent);
+        } else if (!checked) {
+            // Remove the "Retrieved Files" section when unchecked
+            const sections = cachedFileTrees.split('\n\n# ');
+            const filteredSections = sections.filter(section => !section.startsWith('Retrieved Files\n'));
+            const newContent = filteredSections.join('\n\n# ').trim();
+            setCachedFileTrees(newContent === '' ? '' : sections[0] === newContent ? newContent : '# ' + newContent);
+        }
     };
 
     const handleSaveToFile = async () => {
@@ -84,7 +101,19 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
             <h2>Retrieve Files</h2>
             <div style={{ marginBottom: '1rem' }}>
                 <button onClick={handleRetrieve} style={{ marginRight: '1rem' }}>Retrieve</button>
-                <button onClick={handleSaveToFile}>Save to extract.txt</button>
+                {output && (
+                    <>
+                        <button onClick={handleSaveToFile}>Save to extract.txt</button>
+                        <label style={{ marginLeft: '10px' }}>
+                            <input
+                                type="checkbox"
+                                checked={addToContext}
+                                onChange={(e) => handleAddToContextChange(e.target.checked)}
+                            />
+                            Add to context
+                        </label>
+                    </>
+                )}
             </div>
             <textarea
                 rows={5}
