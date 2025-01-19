@@ -3,6 +3,7 @@ import DirectorySelector from './components/DirectorySelector';
 import DirectoryView from './components/DirectoryView';
 import RetrieveBox from './components/RetrieveBox';
 import PromptManager from './components/PromptManager';
+import CustomInstructionBox from './components/CustomInstructionBox';
 
 const App: React.FC = () => {
     const [rootDir, setRootDir] = useState<string>('');
@@ -16,6 +17,9 @@ const App: React.FC = () => {
             <hr />
 
             <RetrieveBox rootDir={rootDir} />
+            <hr />
+
+            <CustomInstructionBox rootDir={rootDir} />
             <hr />
 
             <PromptManager rootDir={rootDir} />
