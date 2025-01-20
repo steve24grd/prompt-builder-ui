@@ -1,33 +1,42 @@
-import React, { useState } from 'react';
+import React from 'react';
+import './App.css';
 import DirectorySelector from './components/DirectorySelector';
 import DirectoryView from './components/DirectoryView';
-import RetrieveBox from './components/RetrieveBox';
-import PromptManager from './components/PromptManager';
 import CustomInstructionBox from './components/CustomInstructionBox';
-import { CacheProvider } from './context/CacheContext';
+import PromptManager from './components/PromptManager';
+import RetrieveBox from './components/RetrieveBox';
+import ErrorBoundary from './components/ErrorBoundary';
 
-const App: React.FC = () => {
-    const [rootDir, setRootDir] = useState<string>('');
+// Import your theme hook
+import { useTheme } from './context/ThemeContext';
+
+function App() {
+    // Access theme and toggle function
+    const { theme, toggleTheme } = useTheme();
 
     return (
-        <CacheProvider>
-            <div style={{ margin: '20px' }}>
-                <h1>Prompt Builder (TypeScript + React)</h1>
-                <DirectorySelector rootDir={rootDir} onRootDirChange={setRootDir} />
+        <div className={`app-container ${theme}`}>
+            {/* Top heading area */}
+            <header className="app-header">
+                <h1>Prompt Builder UI</h1>
+                <button
+                    onClick={toggleTheme}
+                    aria-label="Toggle Dark/Light Mode"
+                >
+                    Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
+                </button>
+            </header>
 
-                <DirectoryView rootDir={rootDir} />
-                <hr />
-
-                <RetrieveBox rootDir={rootDir} />
-                <hr />
-
-                <CustomInstructionBox rootDir={rootDir} />
-                <hr />
-
-                <PromptManager rootDir={rootDir} />
-            </div>
-        </CacheProvider>
+            {/* Other components */}
+            <DirectorySelector rootDir="" onRootDirChange={() => { }} />
+            <ErrorBoundary>
+                <DirectoryView rootDir="" />
+            </ErrorBoundary>
+            <CustomInstructionBox rootDir="" />
+            <RetrieveBox rootDir="" />
+            <PromptManager rootDir="" />
+        </div>
     );
-};
+}
 
 export default App;
