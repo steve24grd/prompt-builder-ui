@@ -147,7 +147,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
             <button style={{ marginLeft: '10px' }} onClick={handleRefreshCount}>
                 Refresh Token Count
             </button>
-            <div style={{ marginTop: '10px' }}>
+            <div style={{ marginTop: '10px', paddingBottom: '20px' }}>
                 <strong>Total Tokens in prompt.txt: {tokenCount}</strong>
             </div>
         </div>
