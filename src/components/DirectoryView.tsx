@@ -9,6 +9,8 @@ interface Props {
 const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
     const [directoryTree, setDirectoryTree] = useState('');
     const [addToContext, setAddToContext] = useState(false);
+    const [extensionFilter, setExtensionFilter] = useState('');
+    const [filteredTree, setFilteredTree] = useState('');
     const { 
         setCachedSourceFileTrees,
         setCachedTargetFileTrees
@@ -36,6 +38,31 @@ const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
             });
     }, [rootDir]);
 
+    useEffect(() => {
+        filterDirectoryTree();
+    }, [directoryTree, extensionFilter]);
+
+    const filterDirectoryTree = () => {
+        if (!directoryTree || !extensionFilter.trim()) {
+            setFilteredTree(directoryTree);
+            return;
+        }
+
+        const extensions = extensionFilter.split(',').map(ext => 
+            ext.trim().startsWith('.') ? ext.trim() : `.${ext.trim()}`
+        );
+
+        const lines = directoryTree.split('\n');
+        const filteredLines = lines.filter(line => {
+            // Keep directory lines (ending with /)
+            if (line.trim().endsWith('/')) return true;
+            // Keep files with matching extensions
+            return extensions.some(ext => line.trim().toLowerCase().endsWith(ext.toLowerCase()));
+        });
+
+        setFilteredTree(filteredLines.join('\n'));
+    };
+
     const handleAddToContextChange = (checked: boolean) => {
         if (!directoryTree) {
             alert('No directory structure available to add to context.');
@@ -51,6 +78,10 @@ const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
         } else {
             setCachedTargetFileTrees(content);
         }
+    };
+
+    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setExtensionFilter(e.target.value);
     };
 
     const handleSaveDirectoryStructure = async () => {
@@ -111,6 +142,26 @@ const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
                     /> Add to context
                 </label>
             </div>
+            <div style={{ marginBottom: '1rem', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                    type="text"
+                    value={extensionFilter}
+                    onChange={handleFilterChange}
+                    placeholder="Enter extensions (e.g., js,tsx,css)"
+                    style={{ 
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #ccc',
+                        flexGrow: 1
+                    }}
+                />
+                <button 
+                    onClick={filterDirectoryTree}
+                    style={{ padding: '4px 12px' }}
+                >
+                    Filter
+                </button>
+            </div>
             <h4>File Trees (Preview)</h4>
             <pre style={{ 
                 maxHeight: '200px', 
@@ -118,7 +169,7 @@ const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
                 padding: '1rem',
                 backgroundColor: '#f5f5f5',
                 borderRadius: '4px'
-            }}>{directoryTree}</pre>
+            }}>{filteredTree || directoryTree}</pre>
         </div>
     );
 };
