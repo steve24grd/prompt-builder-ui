@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import DirectorySelector from './components/DirectorySelector';
 import DirectoryView from './components/DirectoryView';
@@ -13,6 +13,11 @@ import { useTheme } from './context/ThemeContext';
 function App() {
     // Access theme and toggle function
     const { theme, toggleTheme } = useTheme();
+    const [rootDir, setRootDir] = useState('');
+
+    const handleRootDirChange = (newDir: string) => {
+        setRootDir(newDir);
+    };
 
     return (
         <div className={`app-container ${theme}`}>
@@ -28,13 +33,13 @@ function App() {
             </header>
 
             {/* Other components */}
-            <DirectorySelector rootDir="" onRootDirChange={() => { }} />
+            <DirectorySelector rootDir={rootDir} onRootDirChange={handleRootDirChange} />
             <ErrorBoundary>
-                <DirectoryView rootDir="" />
+                <DirectoryView rootDir={rootDir} />
             </ErrorBoundary>
-            <CustomInstructionBox rootDir="" />
-            <RetrieveBox rootDir="" />
-            <PromptManager rootDir="" />
+            <CustomInstructionBox rootDir={rootDir} />
+            <RetrieveBox rootDir={rootDir} />
+            <PromptManager rootDir={rootDir} />
         </div>
     );
 }
