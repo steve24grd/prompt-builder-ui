@@ -9,6 +9,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
     const [cachedContent, setCachedContent] = useState('');
     const [composition, setComposition] = useState('');
     const [tokenCount, setTokenCount] = useState(0);
+    const [previewContent, setPreviewContent] = useState('');
     const { 
         cachedSourceFileTrees,
         cachedTargetFileTrees
@@ -23,6 +24,29 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
         
         setCachedContent(combinedTrees);
     }, [rootDir, cachedSourceFileTrees, cachedTargetFileTrees]);
+
+    useEffect(() => {
+        let reconstructedPrompt = composition;
+            
+        // Replace <file_trees> with cached file trees
+        if (reconstructedPrompt.includes('<file_trees>')) {
+            reconstructedPrompt = reconstructedPrompt.replace(/<file_trees>/g, cachedContent || '');
+        }
+
+        // Replace <retrieved_files> with cached retrieved files
+        if (reconstructedPrompt.includes('<retrieved_files>')) {
+            const retrievedFiles = localStorage.getItem('retrievedFiles') || '';
+            reconstructedPrompt = reconstructedPrompt.replace(/<retrieved_files>/g, retrievedFiles);
+        }
+
+        // Replace <custom_instructions> with cached custom instructions
+        if (reconstructedPrompt.includes('<custom_instructions>')) {
+            const customInstructions = localStorage.getItem('customInstructions') || '';
+            reconstructedPrompt = reconstructedPrompt.replace(/<custom_instructions>/g, customInstructions);
+        }
+
+        setPreviewContent(reconstructedPrompt);
+    }, [composition, cachedContent]);
 
     const handleAppend = async () => {
         if (!rootDir) {
@@ -159,6 +183,21 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
             </button>
             <div style={{ marginTop: '10px', paddingBottom: '20px' }}>
                 <strong>Total Tokens in prompt.txt: {tokenCount}</strong>
+            </div>
+
+            <div style={{ marginTop: '20px' }}>
+                <h3>Preview</h3>
+                <pre style={{ 
+                    maxHeight: '200px', 
+                    overflow: 'auto', 
+                    backgroundColor: '#f5f5f5', 
+                    padding: '10px',
+                    marginBottom: '20px',
+                    whiteSpace: 'pre-wrap',
+                    wordWrap: 'break-word'
+                }}>
+                    {previewContent}
+                </pre>
             </div>
         </div>
     );
