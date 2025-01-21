@@ -9,7 +9,12 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
     const [pathsText, setPathsText] = useState('');
     const [output, setOutput] = useState('');
     const [addToContext, setAddToContext] = useState(false);
-    const { cachedFileTrees, setCachedFileTrees } = useCacheContext();
+    const { 
+        cachedSourceFileTrees, 
+        setCachedSourceFileTrees,
+        cachedTargetFileTrees,
+        setCachedTargetFileTrees 
+    } = useCacheContext();
 
     const handleRetrieve = () => {
         if (!rootDir) {
@@ -37,15 +42,24 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
 
     const handleAddToContextChange = (checked: boolean) => {
         setAddToContext(checked);
+        
         if (checked && output) {
-            const newContent = cachedFileTrees + '\n\n# Retrieved Files\n' + output;
-            setCachedFileTrees(newContent);
+            // Add to both source and target contexts
+            const sourceContent = cachedSourceFileTrees + '\n\n# Retrieved Files\n' + output;
+            const targetContent = cachedTargetFileTrees + '\n\n# Retrieved Files\n' + output;
+            setCachedSourceFileTrees(sourceContent);
+            setCachedTargetFileTrees(targetContent);
         } else if (!checked) {
-            // Remove the "Retrieved Files" section when unchecked
-            const sections = cachedFileTrees.split('\n\n# ');
-            const filteredSections = sections.filter(section => !section.startsWith('Retrieved Files\n'));
-            const newContent = filteredSections.join('\n\n# ').trim();
-            setCachedFileTrees(newContent === '' ? '' : sections[0] === newContent ? newContent : '# ' + newContent);
+            // Remove from both source and target contexts
+            const removeRetrievedFiles = (content: string) => {
+                const sections = content.split('\n\n# ');
+                const filteredSections = sections.filter((section: string) => !section.startsWith('Retrieved Files\n'));
+                const newContent = filteredSections.join('\n\n# ').trim();
+                return newContent === '' ? '' : sections[0] === newContent ? newContent : '# ' + newContent;
+            };
+
+            setCachedSourceFileTrees(removeRetrievedFiles(cachedSourceFileTrees));
+            setCachedTargetFileTrees(removeRetrievedFiles(cachedTargetFileTrees));
         }
     };
 

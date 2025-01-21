@@ -8,11 +8,20 @@ interface Props {
 const PromptManager: React.FC<Props> = ({ rootDir }) => {
     const [files, setFiles] = useState('');
     const [tokenCount, setTokenCount] = useState(0);
-    const { cachedFileTrees } = useCacheContext();
+    const { 
+        cachedSourceFileTrees,
+        cachedTargetFileTrees
+    } = useCacheContext();
 
     useEffect(() => {
-        // Removed updateCachedFileTrees(rootDir) as it's not used in the provided code edit
-    }, [rootDir]);
+        // Combine source and target trees for the prompt
+        const combinedTrees = [
+            cachedSourceFileTrees,
+            cachedTargetFileTrees
+        ].filter(Boolean).join('\n\n');
+        
+        setFiles(combinedTrees);
+    }, [rootDir, cachedSourceFileTrees, cachedTargetFileTrees]);
 
     const handleAppend = async () => {
         if (!rootDir) {
@@ -26,7 +35,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
             
             // Replace <file_trees> with cached file trees
             if (reconstructedPrompt.includes('<file_trees>')) {
-                reconstructedPrompt = reconstructedPrompt.replace(/<file_trees>/g, cachedFileTrees || '');
+                reconstructedPrompt = reconstructedPrompt.replace(/<file_trees>/g, files || '');
             }
 
             // Replace <retrieved_files> with cached retrieved files
@@ -113,7 +122,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
 
             <h3>Cached Context</h3>
             <div style={{ marginBottom: '20px' }}>
-                {cachedFileTrees ? (
+                {files ? (
                     <pre style={{ 
                         maxHeight: '200px', 
                         overflow: 'auto', 
@@ -123,7 +132,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
                         whiteSpace: 'pre-wrap',
                         wordWrap: 'break-word'
                     }}>
-                        {cachedFileTrees}
+                        {files}
                     </pre>
                 ) : (
                     <p style={{ color: '#666', fontStyle: 'italic' }}>No cached content</p>

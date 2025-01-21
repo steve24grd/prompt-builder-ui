@@ -3,12 +3,16 @@ import { useCacheContext } from '../context/CacheContext';
 
 interface Props {
     rootDir: string;
+    type: 'source' | 'target';
 }
 
-const DirectoryView: React.FC<Props> = ({ rootDir }) => {
+const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
     const [directoryTree, setDirectoryTree] = useState('');
     const [addToContext, setAddToContext] = useState(false);
-    const { setCachedFileTrees } = useCacheContext();
+    const { 
+        setCachedSourceFileTrees,
+        setCachedTargetFileTrees
+    } = useCacheContext();
 
     useEffect(() => {
         if (!rootDir) return;
@@ -39,7 +43,14 @@ const DirectoryView: React.FC<Props> = ({ rootDir }) => {
         }
 
         setAddToContext(checked);
-        setCachedFileTrees(checked ? `# file_trees\n${directoryTree}` : '');
+        const prefix = type === 'source' ? '# file_trees_source' : '# file_trees_target';
+        const content = checked ? `${prefix}\n${directoryTree}` : '';
+        
+        if (type === 'source') {
+            setCachedSourceFileTrees(content);
+        } else {
+            setCachedTargetFileTrees(content);
+        }
     };
 
     const handleSaveDirectoryStructure = async () => {
@@ -52,7 +63,7 @@ const DirectoryView: React.FC<Props> = ({ rootDir }) => {
             if ('showDirectoryPicker' in window) {
                 try {
                     const dirHandle = await window.showDirectoryPicker();
-                    const fileHandle = await dirHandle.getFileHandle('file_trees.txt', { create: true });
+                    const fileHandle = await dirHandle.getFileHandle(`file_trees_${type}.txt`, { create: true });
                     const writable = await fileHandle.createWritable();
                     await writable.write(directoryTree);
                     await writable.close();
@@ -75,7 +86,7 @@ const DirectoryView: React.FC<Props> = ({ rootDir }) => {
         const blob = new Blob([directoryTree], { type: 'text/plain;charset=utf-8' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = 'directory-structure.txt';
+        link.download = `directory-structure_${type}.txt`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -91,7 +102,7 @@ const DirectoryView: React.FC<Props> = ({ rootDir }) => {
         <div>
             <h2>File Trees</h2>
             <div style={{ marginBottom: '1rem' }}>
-                <button onClick={handleSaveDirectoryStructure}>Save to file_trees.txt</button>
+                <button onClick={handleSaveDirectoryStructure}>Save to file_trees_{type}.txt</button>
                 <label style={{ marginLeft: '10px' }}>
                     <input 
                         type="checkbox" 

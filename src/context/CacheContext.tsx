@@ -1,17 +1,25 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface CacheContextType {
-    cachedFileTrees: string;
-    setCachedFileTrees: (content: string) => void;
+    cachedSourceFileTrees: string;
+    cachedTargetFileTrees: string;
+    setCachedSourceFileTrees: (content: string) => void;
+    setCachedTargetFileTrees: (content: string) => void;
 }
 
 const CacheContext = createContext<CacheContextType | undefined>(undefined);
 
 export function CacheProvider({ children }: { children: ReactNode }) {
-    const [cachedFileTrees, setCachedFileTrees] = useState('');
+    const [cachedSourceFileTrees, setCachedSourceFileTrees] = useState('');
+    const [cachedTargetFileTrees, setCachedTargetFileTrees] = useState('');
 
     return (
-        <CacheContext.Provider value={{ cachedFileTrees, setCachedFileTrees }}>
+        <CacheContext.Provider value={{ 
+            cachedSourceFileTrees, 
+            setCachedSourceFileTrees,
+            cachedTargetFileTrees, 
+            setCachedTargetFileTrees 
+        }}>
             {children}
         </CacheContext.Provider>
     );

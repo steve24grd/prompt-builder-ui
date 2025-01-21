@@ -11,7 +11,12 @@ const CustomInstructionBox: React.FC<Props> = ({ rootDir }) => {
     const [fileContent, setFileContent] = useState('');
     const [newInstruction, setNewInstruction] = useState('');
     const [addToContext, setAddToContext] = useState(false);
-    const { cachedFileTrees, setCachedFileTrees } = useCacheContext();
+    const { 
+        cachedSourceFileTrees, 
+        setCachedSourceFileTrees,
+        cachedTargetFileTrees,
+        setCachedTargetFileTrees 
+    } = useCacheContext();
 
     const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -64,14 +69,22 @@ const CustomInstructionBox: React.FC<Props> = ({ rootDir }) => {
         const content = instructionType === 'file' ? fileContent : newInstruction;
         
         if (checked && content) {
-            const newContent = cachedFileTrees + '\n\n# Custom Instructions\n' + content;
-            setCachedFileTrees(newContent);
+            // Add to both source and target contexts
+            const sourceContent = cachedSourceFileTrees + '\n\n# Custom Instructions\n' + content;
+            const targetContent = cachedTargetFileTrees + '\n\n# Custom Instructions\n' + content;
+            setCachedSourceFileTrees(sourceContent);
+            setCachedTargetFileTrees(targetContent);
         } else if (!checked) {
-            // Remove the "Custom Instructions" section when unchecked
-            const sections = cachedFileTrees.split('\n\n# ');
-            const filteredSections = sections.filter(section => !section.startsWith('Custom Instructions\n'));
-            const newContent = filteredSections.join('\n\n# ').trim();
-            setCachedFileTrees(newContent === '' ? '' : sections[0] === newContent ? newContent : '# ' + newContent);
+            // Remove from both source and target contexts
+            const removeCustomInstructions = (content: string) => {
+                const sections = content.split('\n\n# ');
+                const filteredSections = sections.filter((section: string) => !section.startsWith('Custom Instructions\n'));
+                const newContent = filteredSections.join('\n\n# ').trim();
+                return newContent === '' ? '' : sections[0] === newContent ? newContent : '# ' + newContent;
+            };
+
+            setCachedSourceFileTrees(removeCustomInstructions(cachedSourceFileTrees));
+            setCachedTargetFileTrees(removeCustomInstructions(cachedTargetFileTrees));
         }
     };
 
