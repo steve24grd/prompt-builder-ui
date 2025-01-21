@@ -100,20 +100,6 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
             }
-
-            // Update token count
-            fetch('http://localhost:4000/api/prompt-token-count', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rootDir }),
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.tokenCount !== undefined) {
-                        setTokenCount(data.tokenCount);
-                    }
-                });
-
         } catch (err) {
             console.error(err);
             alert(`Failed to save prompt: ${err instanceof Error ? err.message : 'Unknown error occurred'}`);
