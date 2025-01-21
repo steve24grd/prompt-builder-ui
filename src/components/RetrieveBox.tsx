@@ -127,7 +127,13 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
             {output && (
                 <div style={{ marginTop: '1rem' }}>
                     <h4>Output (preview)</h4>
-                    <pre>{output}</pre>
+                    <pre style={{ 
+                        maxHeight: '200px', 
+                        overflow: 'auto', 
+                        padding: '1rem',
+                        backgroundColor: '#f5f5f5',
+                        borderRadius: '4px'
+                    }}>{output}</pre>
                 </div>
             )}
         </div>

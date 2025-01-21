@@ -107,7 +107,7 @@ const CustomInstructionBox: React.FC<Props> = ({ rootDir }) => {
                     />
                     {selectedFile && (
                         <div style={{ marginTop: '1rem' }}>
-                            <h4>File Content Preview:</h4>
+                            <h4>Custom Instruction (Preview)</h4>
                             <pre style={{ 
                                 maxHeight: '200px', 
                                 overflow: 'auto', 
