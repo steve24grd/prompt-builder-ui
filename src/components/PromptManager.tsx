@@ -102,10 +102,10 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
             }
 
             // Update token count
-            fetch('http://localhost:4000/api/count-tokens', {
+            fetch('http://localhost:4000/api/prompt-token-count', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: reconstructedPrompt }),
+                body: JSON.stringify({ rootDir }),
             })
                 .then(res => res.json())
                 .then(data => {
@@ -121,24 +121,53 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
     };
 
     const handleRefreshCount = () => {
-        if (!rootDir) return;
-        fetch('http://localhost:4000/api/prompt-token-count', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rootDir }),
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.tokenCount !== undefined) {
-                    setTokenCount(data.tokenCount);
-                } else if (data.error) {
-                    alert(`Error: ${data.error}`);
-                }
+        if (!rootDir) {
+            alert('Please set the root directory first using the "Set Root" button at the top of the page.');
+            return;
+        }
+
+        try {
+            // Reconstruct prompt by replacing tags with cached content
+            let reconstructedPrompt = composition;
+            
+            // Replace <file_trees> with cached file trees
+            if (reconstructedPrompt.includes('<file_trees>')) {
+                reconstructedPrompt = reconstructedPrompt.replace(/<file_trees>/g, cachedContent || '');
+            }
+
+            // Replace <retrieved_files> with cached retrieved files
+            if (reconstructedPrompt.includes('<retrieved_files>')) {
+                const retrievedFiles = localStorage.getItem('retrievedFiles') || '';
+                reconstructedPrompt = reconstructedPrompt.replace(/<retrieved_files>/g, retrievedFiles);
+            }
+
+            // Replace <custom_instructions> with cached custom instructions
+            if (reconstructedPrompt.includes('<custom_instructions>')) {
+                const customInstructions = localStorage.getItem('customInstructions') || '';
+                reconstructedPrompt = reconstructedPrompt.replace(/<custom_instructions>/g, customInstructions);
+            }
+
+            fetch('http://localhost:4000/api/prompt-token-count', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: reconstructedPrompt }),
             })
-            .catch(err => {
-                console.error(err);
-                alert(`Failed to get token count: ${err.message}`);
-            });
+                .then(res => res.json())
+                .then(data => {
+                    if (data.tokenCount !== undefined) {
+                        setTokenCount(data.tokenCount);
+                    } else if (data.error) {
+                        alert(`Error: ${data.error}`);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert(`Failed to get token count: ${err.message}`);
+                });
+        } catch (err) {
+            console.error(err);
+            alert(`Failed to get token count: ${err instanceof Error ? err.message : 'Unknown error occurred'}`);
+        }
     };
 
     return (
