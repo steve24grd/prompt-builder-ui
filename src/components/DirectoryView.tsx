@@ -100,7 +100,14 @@ const DirectoryView: React.FC<Props> = ({ rootDir }) => {
                     /> Add to context
                 </label>
             </div>
-            <pre>{directoryTree}</pre>
+            <h4>File Trees (Preview)</h4>
+            <pre style={{ 
+                maxHeight: '200px', 
+                overflow: 'auto', 
+                padding: '1rem',
+                backgroundColor: '#f5f5f5',
+                borderRadius: '4px'
+            }}>{directoryTree}</pre>
         </div>
     );
 };
