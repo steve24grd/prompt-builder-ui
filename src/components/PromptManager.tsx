@@ -6,7 +6,8 @@ interface Props {
 }
 
 const PromptManager: React.FC<Props> = ({ rootDir }) => {
-    const [files, setFiles] = useState('');
+    const [cachedContent, setCachedContent] = useState('');
+    const [composition, setComposition] = useState('');
     const [tokenCount, setTokenCount] = useState(0);
     const { 
         cachedSourceFileTrees,
@@ -14,13 +15,13 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
     } = useCacheContext();
 
     useEffect(() => {
-        // Combine source and target trees for the prompt
+        // Combine source and target trees for the cached content
         const combinedTrees = [
             cachedSourceFileTrees,
             cachedTargetFileTrees
         ].filter(Boolean).join('\n\n');
         
-        setFiles(combinedTrees);
+        setCachedContent(combinedTrees);
     }, [rootDir, cachedSourceFileTrees, cachedTargetFileTrees]);
 
     const handleAppend = async () => {
@@ -31,11 +32,11 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
 
         try {
             // Reconstruct prompt by replacing tags with cached content
-            let reconstructedPrompt = files;
+            let reconstructedPrompt = composition;
             
             // Replace <file_trees> with cached file trees
             if (reconstructedPrompt.includes('<file_trees>')) {
-                reconstructedPrompt = reconstructedPrompt.replace(/<file_trees>/g, files || '');
+                reconstructedPrompt = reconstructedPrompt.replace(/<file_trees>/g, cachedContent || '');
             }
 
             // Replace <retrieved_files> with cached retrieved files
@@ -122,7 +123,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
 
             <h3>Cached Context</h3>
             <div style={{ marginBottom: '20px' }}>
-                {files ? (
+                {cachedContent ? (
                     <pre style={{ 
                         maxHeight: '200px', 
                         overflow: 'auto', 
@@ -132,7 +133,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
                         whiteSpace: 'pre-wrap',
                         wordWrap: 'break-word'
                     }}>
-                        {files}
+                        {cachedContent}
                     </pre>
                 ) : (
                     <p style={{ color: '#666', fontStyle: 'italic' }}>No cached content</p>
@@ -143,8 +144,8 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
             <textarea
                 rows={5}
                 cols={50}
-                value={files}
-                onChange={e => setFiles(e.target.value)}
+                value={composition}
+                onChange={e => setComposition(e.target.value)}
                 placeholder="Example:
 <file_trees>
 <retrieved_files>
