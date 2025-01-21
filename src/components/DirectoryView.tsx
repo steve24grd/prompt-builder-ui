@@ -64,14 +64,14 @@ const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
     };
 
     const handleAddToContextChange = (checked: boolean) => {
-        if (!directoryTree) {
+        if (!filteredTree) {
             alert('No directory structure available to add to context.');
             return;
         }
 
         setAddToContext(checked);
         const prefix = type === 'source' ? '# file_trees_source' : '# file_trees_target';
-        const content = checked ? `${prefix}\n${directoryTree}` : '';
+        const content = checked ? `${prefix}\n${filteredTree}` : '';
         
         if (type === 'source') {
             setCachedSourceFileTrees(content);
