@@ -70,7 +70,7 @@ const CustomInstructionBox: React.FC<Props> = ({ rootDir }) => {
         
         if (checked && content) {
             // Add to both source and target contexts
-            const sourceContent = cachedSourceFileTrees + '\n\n# Custom Instructions\n' + content;
+            const sourceContent = cachedSourceFileTrees;
             const targetContent = cachedTargetFileTrees + '\n\n# Custom Instructions\n' + content;
             setCachedSourceFileTrees(sourceContent);
             setCachedTargetFileTrees(targetContent);
