@@ -44,22 +44,11 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
         setAddToContext(checked);
         
         if (checked && output) {
-            // Add to both source and target contexts
-            const sourceContent = cachedSourceFileTrees;
-            const targetContent = cachedTargetFileTrees + '\n\n# Retrieved Files\n' + output;
-            setCachedSourceFileTrees(sourceContent);
-            setCachedTargetFileTrees(targetContent);
+            // Store retrieved files in localStorage
+            localStorage.setItem('retrievedFiles', output);
         } else if (!checked) {
-            // Remove from both source and target contexts
-            const removeRetrievedFiles = (content: string) => {
-                const sections = content.split('\n\n# ');
-                const filteredSections = sections.filter((section: string) => !section.startsWith('Retrieved Files\n'));
-                const newContent = filteredSections.join('\n\n# ').trim();
-                return newContent === '' ? '' : sections[0] === newContent ? newContent : '# ' + newContent;
-            };
-
-            setCachedSourceFileTrees(removeRetrievedFiles(cachedSourceFileTrees));
-            setCachedTargetFileTrees(removeRetrievedFiles(cachedTargetFileTrees));
+            // Remove retrieved files from localStorage
+            localStorage.removeItem('retrievedFiles');
         }
     };
 
