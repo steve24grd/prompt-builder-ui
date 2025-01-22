@@ -7,6 +7,7 @@ import PromptManager from './components/PromptManager';
 import RetrieveBox from './components/RetrieveBox';
 import ErrorBoundary from './components/ErrorBoundary';
 import TargetDirectorySelector from './components/TargetDirectorySelector';
+import SpecsBox from './components/SpecsBox';
 
 // Import your theme hook
 import { useTheme } from './context/ThemeContext';
@@ -58,6 +59,7 @@ function App() {
 
             <ErrorBoundary>
                 <CustomInstructionBox rootDir={rootDir} />
+                <SpecsBox rootDir={rootDir} />
                 <RetrieveBox rootDir={rootDir} />
                 <PromptManager rootDir={rootDir} />
             </ErrorBoundary>
