@@ -73,7 +73,7 @@ const SpecsBox: React.FC<Props> = ({ rootDir }) => {
             localStorage.setItem('specs', content);
             
             // Add to both source and target contexts
-            const sourceContent = cachedSourceFileTrees + '\n\n# Specs\n' + content;
+            const sourceContent = cachedSourceFileTrees;
             const targetContent = cachedTargetFileTrees + '\n\n# Specs\n' + content;
             setCachedSourceFileTrees(sourceContent);
             setCachedTargetFileTrees(targetContent);
