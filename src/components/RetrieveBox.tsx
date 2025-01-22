@@ -44,7 +44,7 @@ const RetrieveBox: React.FC = () => {
         
         if (checked && output) {
             setRetrievedFiles(output);
-            // Also store in localStorage as backup
+            // Store in localStorage as backup
             localStorage.setItem('retrievedFiles', output);
         } else if (!checked) {
             setRetrievedFiles('');
