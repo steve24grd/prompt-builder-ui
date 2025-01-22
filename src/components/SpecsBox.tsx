@@ -69,6 +69,9 @@ const SpecsBox: React.FC<Props> = ({ rootDir }) => {
         const content = specsType === 'file' ? fileContent : newSpecs;
         
         if (checked && content) {
+            // Save to localStorage
+            localStorage.setItem('specs', content);
+            
             // Add to both source and target contexts
             const sourceContent = cachedSourceFileTrees + '\n\n# Specs\n' + content;
             const targetContent = cachedTargetFileTrees + '\n\n# Specs\n' + content;

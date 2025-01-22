@@ -54,6 +54,12 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
             reconstructedPrompt = reconstructedPrompt.replace(/<custom_instructions>/g, customInstructions);
         }
 
+        // Replace <specs> with cached specs
+        if (reconstructedPrompt.includes('<specs>')) {
+            const specs = localStorage.getItem('specs') || '';
+            reconstructedPrompt = reconstructedPrompt.replace(/<specs>/g, specs);
+        }
+
         setPreviewContent(reconstructedPrompt);
     }, [composition, cachedSourceFileTrees, cachedTargetFileTrees]);
 
@@ -80,6 +86,12 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
             if (reconstructedPrompt.includes('<custom_instructions>')) {
                 const customInstructions = localStorage.getItem('customInstructions') || '';
                 reconstructedPrompt = reconstructedPrompt.replace(/<custom_instructions>/g, customInstructions);
+            }
+
+            // Replace <specs> with cached specs
+            if (reconstructedPrompt.includes('<specs>')) {
+                const specs = localStorage.getItem('specs') || '';
+                reconstructedPrompt = reconstructedPrompt.replace(/<specs>/g, specs);
             }
 
             // Save using File System Access API
@@ -138,6 +150,12 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
                 reconstructedPrompt = reconstructedPrompt.replace(/<custom_instructions>/g, customInstructions);
             }
 
+            // Replace <specs> with cached specs
+            if (reconstructedPrompt.includes('<specs>')) {
+                const specs = localStorage.getItem('specs') || '';
+                reconstructedPrompt = reconstructedPrompt.replace(/<specs>/g, specs);
+            }
+
             fetch('http://localhost:4000/api/prompt-token-count', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -186,7 +204,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
                 )}
             </div>
 
-            <p>Compose your prompt here by including <b>{`<file_trees_source>, <file_trees_target>, <retrieved_files>, and <custom_instructions>`}</b> to embed additional context</p>
+            <p>Compose your prompt here by including <b>{`<file_trees_source>, <file_trees_target>, <retrieved_files>, <custom_instructions>, and <specs>`}</b> to embed additional context</p>
             <textarea
                 rows={5}
                 cols={50}
@@ -197,6 +215,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
 <file_trees_target>
 <retrieved_files>
 <custom_instructions>
+<specs>
 "
             />
             <br />
