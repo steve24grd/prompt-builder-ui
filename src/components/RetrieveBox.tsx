@@ -45,7 +45,7 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
         
         if (checked && output) {
             // Add to both source and target contexts
-            const sourceContent = cachedSourceFileTrees + '\n\n# Retrieved Files\n' + output;
+            const sourceContent = cachedSourceFileTrees;
             const targetContent = cachedTargetFileTrees + '\n\n# Retrieved Files\n' + output;
             setCachedSourceFileTrees(sourceContent);
             setCachedTargetFileTrees(targetContent);
