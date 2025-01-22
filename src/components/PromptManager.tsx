@@ -16,22 +16,31 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
     } = useCacheContext();
 
     useEffect(() => {
-        // Combine source and target trees for the cached content
-        const combinedTrees = [
-            cachedSourceFileTrees,
-            cachedTargetFileTrees
-        ].filter(Boolean).join('\n\n');
+        // Remove combined trees effect since we'll handle source and target separately
+        setCachedContent('');
+    }, [rootDir]);
+
+    const replaceFileTrees = (prompt: string): string => {
+        let result = prompt;
         
-        setCachedContent(combinedTrees);
-    }, [rootDir, cachedSourceFileTrees, cachedTargetFileTrees]);
+        // Replace <file_trees_source> with source trees
+        if (result.includes('<file_trees_source>')) {
+            result = result.replace(/<file_trees_source>/g, cachedSourceFileTrees || '');
+        }
+        
+        // Replace <file_trees_target> with target trees
+        if (result.includes('<file_trees_target>')) {
+            result = result.replace(/<file_trees_target>/g, cachedTargetFileTrees || '');
+        }
+        
+        return result;
+    };
 
     useEffect(() => {
         let reconstructedPrompt = composition;
             
-        // Replace <file_trees> with cached file trees
-        if (reconstructedPrompt.includes('<file_trees>')) {
-            reconstructedPrompt = reconstructedPrompt.replace(/<file_trees>/g, cachedContent || '');
-        }
+        // Replace file trees tags
+        reconstructedPrompt = replaceFileTrees(reconstructedPrompt);
 
         // Replace <retrieved_files> with cached retrieved files
         if (reconstructedPrompt.includes('<retrieved_files>')) {
@@ -46,7 +55,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
         }
 
         setPreviewContent(reconstructedPrompt);
-    }, [composition, cachedContent]);
+    }, [composition, cachedSourceFileTrees, cachedTargetFileTrees]);
 
     const handleAppend = async () => {
         if (!rootDir) {
@@ -58,10 +67,8 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
             // Reconstruct prompt by replacing tags with cached content
             let reconstructedPrompt = composition;
             
-            // Replace <file_trees> with cached file trees
-            if (reconstructedPrompt.includes('<file_trees>')) {
-                reconstructedPrompt = reconstructedPrompt.replace(/<file_trees>/g, cachedContent || '');
-            }
+            // Replace file trees tags
+            reconstructedPrompt = replaceFileTrees(reconstructedPrompt);
 
             // Replace <retrieved_files> with cached retrieved files
             if (reconstructedPrompt.includes('<retrieved_files>')) {
@@ -116,10 +123,8 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
             // Reconstruct prompt by replacing tags with cached content
             let reconstructedPrompt = composition;
             
-            // Replace <file_trees> with cached file trees
-            if (reconstructedPrompt.includes('<file_trees>')) {
-                reconstructedPrompt = reconstructedPrompt.replace(/<file_trees>/g, cachedContent || '');
-            }
+            // Replace file trees tags
+            reconstructedPrompt = replaceFileTrees(reconstructedPrompt);
 
             // Replace <retrieved_files> with cached retrieved files
             if (reconstructedPrompt.includes('<retrieved_files>')) {
@@ -162,7 +167,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
 
             <h3>Cached Context</h3>
             <div style={{ marginBottom: '20px' }}>
-                {cachedContent ? (
+                {cachedSourceFileTrees || cachedTargetFileTrees ? (
                     <pre style={{ 
                         maxHeight: '200px', 
                         overflow: 'auto', 
@@ -172,21 +177,24 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
                         whiteSpace: 'pre-wrap',
                         wordWrap: 'break-word'
                     }}>
-                        {cachedContent}
+                        {cachedSourceFileTrees}
+                        {cachedTargetFileTrees && <br />}
+                        {cachedTargetFileTrees}
                     </pre>
                 ) : (
                     <p style={{ color: '#666', fontStyle: 'italic' }}>No cached content</p>
                 )}
             </div>
 
-            <p>Compose your prompt here by including <b>{`<file_trees>, <retrieved_files>, and <custom_instructions>`}</b> to embed additional context</p>
+            <p>Compose your prompt here by including <b>{`<file_trees_source>, <file_trees_target>, <retrieved_files>, and <custom_instructions>`}</b> to embed additional context</p>
             <textarea
                 rows={5}
                 cols={50}
                 value={composition}
                 onChange={e => setComposition(e.target.value)}
                 placeholder="Example:
-<file_trees>
+<file_trees_source>
+<file_trees_target>
 <retrieved_files>
 <custom_instructions>
 "
