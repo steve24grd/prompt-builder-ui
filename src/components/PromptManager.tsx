@@ -181,23 +181,19 @@ const PromptManager: React.FC = () => {
 
             <h3>Cached Context</h3>
             <div style={{ marginBottom: '20px' }}>
-                {cachedSourceFileTrees || cachedTargetFileTrees ? (
-                    <pre style={{ 
-                        maxHeight: '200px', 
-                        overflow: 'auto', 
-                        backgroundColor: '#f5f5f5', 
-                        padding: '10px',
-                        marginBottom: '20px',
-                        whiteSpace: 'pre-wrap',
-                        wordWrap: 'break-word'
-                    }}>
-                        {cachedSourceFileTrees}
-                        {cachedTargetFileTrees && <br />}
-                        {cachedTargetFileTrees}
-                    </pre>
-                ) : (
-                    <p style={{ color: '#666', fontStyle: 'italic' }}>No cached content</p>
-                )}
+                <pre style={{ 
+                    maxHeight: '200px', 
+                    overflow: 'auto', 
+                    backgroundColor: '#f5f5f5', 
+                    padding: '10px',
+                    marginBottom: '20px',
+                    whiteSpace: 'pre-wrap',
+                    wordWrap: 'break-word'
+                }}>
+                    {cachedSourceFileTrees && '# file_trees_source'}
+                    {cachedTargetFileTrees && '\n# file_trees_target'}
+                    {retrievedFiles && '\n# retrieved_files'}
+                </pre>
             </div>
 
             <p>Compose your prompt here by including <b>{`<file_trees_source>, <file_trees_target>, <retrieved_files>, <custom_instructions>, and <specs>`}</b> to embed additional context</p>
