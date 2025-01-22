@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useCacheContext } from '../context/CacheContext';
+import { useRootDirectories } from '../context/RootDirectoriesContext';
 
-interface Props {
-    rootDir: string;
-}
-
-const PromptManager: React.FC<Props> = ({ rootDir }) => {
+const PromptManager: React.FC = () => {
+    const { rootDir } = useRootDirectories(); // <--- from context
     const [cachedContent, setCachedContent] = useState('');
     const [composition, setComposition] = useState('');
     const [tokenCount, setTokenCount] = useState(0);

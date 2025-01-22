@@ -1,45 +1,52 @@
 import React, { useEffect, useState } from 'react';
 import { useCacheContext } from '../context/CacheContext';
+import { useRootDirectories } from '../context/RootDirectoriesContext';
 
 interface Props {
-    rootDir: string;
     type: 'source' | 'target';
 }
 
-const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
+const DirectoryView: React.FC<Props> = ({ type }) => {
+    // Access from the new RootDirectoriesContext
+    const { rootDir, targetDir } = useRootDirectories();
+    // Decide which directory we should actually use
+    const usedDir = type === 'source' ? rootDir : targetDir;
+
     const [directoryTree, setDirectoryTree] = useState('');
     const [addToContext, setAddToContext] = useState(false);
     const [extensionFilter, setExtensionFilter] = useState('');
     const [filteredTree, setFilteredTree] = useState('');
-    const { 
+
+    const {
         setCachedSourceFileTrees,
         setCachedTargetFileTrees
     } = useCacheContext();
 
     useEffect(() => {
-        if (!rootDir) return;
+        if (!usedDir) return;
 
         fetch('http://localhost:4000/api/directory', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rootDir }),
+            body: JSON.stringify({ rootDir: usedDir }),
         })
-            .then(res => res.json())
-            .then(data => {
+            .then((res) => res.json())
+            .then((data) => {
                 if (data.directoryTree) {
                     setDirectoryTree(data.directoryTree);
                 } else if (data.error) {
                     alert(`Error: ${data.error}`);
                 }
             })
-            .catch(err => {
+            .catch((err) => {
                 console.error(err);
                 alert(`Failed to fetch directory tree: ${err.message}`);
             });
-    }, [rootDir]);
+    }, [usedDir]);
 
     useEffect(() => {
         filterDirectoryTree();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [directoryTree, extensionFilter]);
 
     const filterDirectoryTree = () => {
@@ -48,16 +55,15 @@ const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
             return;
         }
 
-        const extensions = extensionFilter.split(',').map(ext => 
-            ext.trim().startsWith('.') ? ext.trim() : `.${ext.trim()}`
-        );
+        const extensions = extensionFilter
+            .split(',')
+            .map((ext) => (ext.trim().startsWith('.') ? ext.trim() : `.${ext.trim()}`));
 
         const lines = directoryTree.split('\n');
-        const filteredLines = lines.filter(line => {
-            // Keep directory lines (ending with /)
-            if (line.trim().endsWith('/')) return true;
-            // Keep files with matching extensions
-            return extensions.some(ext => line.trim().toLowerCase().endsWith(ext.toLowerCase()));
+        const filteredLines = lines.filter((line) => {
+            if (line.trim().endsWith('/')) return true; // keep directories
+            // keep files with matching extensions
+            return extensions.some((ext) => line.trim().toLowerCase().endsWith(ext.toLowerCase()));
         });
 
         setFilteredTree(filteredLines.join('\n'));
@@ -72,7 +78,7 @@ const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
         setAddToContext(checked);
         const prefix = type === 'source' ? '# file_trees_source' : '# file_trees_target';
         const content = checked ? `${prefix}\n${filteredTree}` : '';
-        
+
         if (type === 'source') {
             setCachedSourceFileTrees(content);
         } else {
@@ -98,8 +104,9 @@ const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
                     const writable = await fileHandle.createWritable();
                     await writable.write(directoryTree);
                     await writable.close();
-                    
+
                     alert('Successfully saved file tree to the selected directory');
+                    return;
                 } catch (err) {
                     console.warn('Directory access failed, falling back to download:', err);
                     downloadDirectoryStructure();
@@ -109,7 +116,8 @@ const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
             }
         } catch (err) {
             console.error(err);
-            alert(`Failed to save directory structure: ${err instanceof Error ? err.message : 'Unknown error occurred'}`);
+            alert(`Failed to save directory structure: ${err instanceof Error ? err.message : 'Unknown error occurred'
+                }`);
         }
     };
 
@@ -125,21 +133,24 @@ const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
         alert('Directory structure download started');
     };
 
-    if (!rootDir) {
-        return <div>Please set the root directory above.</div>;
+    if (!usedDir) {
+        return <div>Please set the {type} directory above.</div>;
     }
 
     return (
         <div>
             <h2>File Trees</h2>
             <div style={{ marginBottom: '1rem' }}>
-                <button onClick={handleSaveDirectoryStructure}>Save to file_trees_{type}.txt</button>
+                <button onClick={handleSaveDirectoryStructure}>
+                    Save to file_trees_{type}.txt
+                </button>
                 <label style={{ marginLeft: '10px' }}>
-                    <input 
-                        type="checkbox" 
-                        checked={addToContext} 
+                    <input
+                        type="checkbox"
+                        checked={addToContext}
                         onChange={(e) => handleAddToContextChange(e.target.checked)}
-                    /> Add to context
+                    />
+                    Add to context
                 </label>
             </div>
             <div style={{ marginBottom: '1rem', display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -148,28 +159,29 @@ const DirectoryView: React.FC<Props> = ({ rootDir, type }) => {
                     value={extensionFilter}
                     onChange={handleFilterChange}
                     placeholder="Enter extensions (e.g., js,tsx,css)"
-                    style={{ 
+                    style={{
                         padding: '4px 8px',
                         borderRadius: '4px',
                         border: '1px solid #ccc',
                         flexGrow: 1
                     }}
                 />
-                <button 
-                    onClick={filterDirectoryTree}
-                    style={{ padding: '4px 12px' }}
-                >
+                <button onClick={filterDirectoryTree} style={{ padding: '4px 12px' }}>
                     Filter
                 </button>
             </div>
             <h4>File Trees (Preview)</h4>
-            <pre style={{ 
-                maxHeight: '200px', 
-                overflow: 'auto', 
-                padding: '1rem',
-                backgroundColor: '#f5f5f5',
-                borderRadius: '4px'
-            }}>{filteredTree || directoryTree}</pre>
+            <pre
+                style={{
+                    maxHeight: '200px',
+                    overflow: 'auto',
+                    padding: '1rem',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '4px'
+                }}
+            >
+                {filteredTree || directoryTree}
+            </pre>
         </div>
     );
 };

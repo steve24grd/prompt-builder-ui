@@ -1,11 +1,9 @@
 import React, { useState, ChangeEvent } from 'react';
 import { useCacheContext } from '../context/CacheContext';
+import { useRootDirectories } from '../context/RootDirectoriesContext';
 
-interface Props {
-    rootDir: string;
-}
-
-const SpecsBox: React.FC<Props> = ({ rootDir }) => {
+const SpecsBox: React.FC = () => {
+    const { rootDir } = useRootDirectories(); // <--- from context
     const [specsType, setSpecsType] = useState<'file' | 'new'>('new');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [fileContent, setFileContent] = useState('');

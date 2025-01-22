@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { useCacheContext } from '../context/CacheContext';
+import { useRootDirectories } from '../context/RootDirectoriesContext';
 
-interface Props {
-    rootDir: string;
-}
-
-const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
+const RetrieveBox: React.FC = () => {
+    const { rootDir } = useRootDirectories(); // <--- from context
     const [pathsText, setPathsText] = useState('');
     const [output, setOutput] = useState('');
     const [addToContext, setAddToContext] = useState(false);
