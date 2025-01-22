@@ -12,7 +12,8 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
     const [previewContent, setPreviewContent] = useState('');
     const { 
         cachedSourceFileTrees,
-        cachedTargetFileTrees
+        cachedTargetFileTrees,
+        retrievedFiles
     } = useCacheContext();
 
     useEffect(() => {
@@ -44,8 +45,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
 
         // Replace <retrieved_files> with cached retrieved files
         if (reconstructedPrompt.includes('<retrieved_files>')) {
-            const retrievedFiles = localStorage.getItem('retrievedFiles') || '';
-            reconstructedPrompt = reconstructedPrompt.replace(/<retrieved_files>/g, retrievedFiles);
+            reconstructedPrompt = reconstructedPrompt.replace(/<retrieved_files>/g, retrievedFiles || '');
         }
 
         // Replace <custom_instructions> with cached custom instructions
@@ -61,7 +61,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
         }
 
         setPreviewContent(reconstructedPrompt);
-    }, [composition, cachedSourceFileTrees, cachedTargetFileTrees]);
+    }, [composition, cachedSourceFileTrees, cachedTargetFileTrees, retrievedFiles]);
 
     const handleAppend = async () => {
         if (!rootDir) {
@@ -78,8 +78,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
 
             // Replace <retrieved_files> with cached retrieved files
             if (reconstructedPrompt.includes('<retrieved_files>')) {
-                const retrievedFiles = localStorage.getItem('retrievedFiles') || '';
-                reconstructedPrompt = reconstructedPrompt.replace(/<retrieved_files>/g, retrievedFiles);
+                reconstructedPrompt = reconstructedPrompt.replace(/<retrieved_files>/g, retrievedFiles || '');
             }
 
             // Replace <custom_instructions> with cached custom instructions
@@ -140,8 +139,7 @@ const PromptManager: React.FC<Props> = ({ rootDir }) => {
 
             // Replace <retrieved_files> with cached retrieved files
             if (reconstructedPrompt.includes('<retrieved_files>')) {
-                const retrievedFiles = localStorage.getItem('retrievedFiles') || '';
-                reconstructedPrompt = reconstructedPrompt.replace(/<retrieved_files>/g, retrievedFiles);
+                reconstructedPrompt = reconstructedPrompt.replace(/<retrieved_files>/g, retrievedFiles || '');
             }
 
             // Replace <custom_instructions> with cached custom instructions

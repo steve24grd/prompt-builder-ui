@@ -13,7 +13,8 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
         cachedSourceFileTrees, 
         setCachedSourceFileTrees,
         cachedTargetFileTrees,
-        setCachedTargetFileTrees 
+        setCachedTargetFileTrees,
+        setRetrievedFiles
     } = useCacheContext();
 
     const handleRetrieve = () => {
@@ -44,10 +45,11 @@ const RetrieveBox: React.FC<Props> = ({ rootDir }) => {
         setAddToContext(checked);
         
         if (checked && output) {
-            // Store retrieved files in localStorage
+            setRetrievedFiles(output);
+            // Also store in localStorage as backup
             localStorage.setItem('retrievedFiles', output);
         } else if (!checked) {
-            // Remove retrieved files from localStorage
+            setRetrievedFiles('');
             localStorage.removeItem('retrievedFiles');
         }
     };
