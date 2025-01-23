@@ -3,18 +3,13 @@ import { useCacheContext } from '../context/CacheContext';
 import { useRootDirectories } from '../context/RootDirectoriesContext';
 
 const SpecsBox: React.FC = () => {
-    const { rootDir } = useRootDirectories(); // <--- from context
+    const { rootDir } = useRootDirectories();
+    const { specs, setSpecs } = useCacheContext();
     const [specsType, setSpecsType] = useState<'file' | 'new'>('new');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [fileContent, setFileContent] = useState('');
     const [newSpecs, setNewSpecs] = useState('');
     const [addToContext, setAddToContext] = useState(false);
-    const { 
-        cachedSourceFileTrees, 
-        setCachedSourceFileTrees,
-        cachedTargetFileTrees,
-        setCachedTargetFileTrees 
-    } = useCacheContext();
 
     const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -67,25 +62,12 @@ const SpecsBox: React.FC = () => {
         const content = specsType === 'file' ? fileContent : newSpecs;
         
         if (checked && content) {
-            // Save to localStorage
+            setSpecs(content);
+            // Store in localStorage as backup
             localStorage.setItem('specs', content);
-            
-            // Add to both source and target contexts
-            const sourceContent = cachedSourceFileTrees;
-            const targetContent = cachedTargetFileTrees + '\n\n# Specs\n' + content;
-            setCachedSourceFileTrees(sourceContent);
-            setCachedTargetFileTrees(targetContent);
         } else if (!checked) {
-            // Remove from both source and target contexts
-            const removeSpecs = (content: string) => {
-                const sections = content.split('\n\n# ');
-                const filteredSections = sections.filter((section: string) => !section.startsWith('Specs\n'));
-                const newContent = filteredSections.join('\n\n# ').trim();
-                return newContent === '' ? '' : sections[0] === newContent ? newContent : '# ' + newContent;
-            };
-
-            setCachedSourceFileTrees(removeSpecs(cachedSourceFileTrees));
-            setCachedTargetFileTrees(removeSpecs(cachedTargetFileTrees));
+            setSpecs('');
+            localStorage.removeItem('specs');
         }
     };
 

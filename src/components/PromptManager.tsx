@@ -12,7 +12,8 @@ const PromptManager: React.FC = () => {
         cachedSourceFileTrees,
         cachedTargetFileTrees,
         retrievedFiles,
-        customInstructions
+        customInstructions,
+        specs
     } = useCacheContext();
 
     useEffect(() => {
@@ -54,12 +55,11 @@ const PromptManager: React.FC = () => {
 
         // Replace <specs> with cached specs
         if (reconstructedPrompt.includes('<specs>')) {
-            const specs = localStorage.getItem('specs') || '';
-            reconstructedPrompt = reconstructedPrompt.replace(/<specs>/g, specs);
+            reconstructedPrompt = reconstructedPrompt.replace(/<specs>/g, specs || '');
         }
 
         setPreviewContent(reconstructedPrompt);
-    }, [composition, cachedSourceFileTrees, cachedTargetFileTrees, retrievedFiles, customInstructions]);
+    }, [composition, cachedSourceFileTrees, cachedTargetFileTrees, retrievedFiles, customInstructions, specs]);
 
     const handleAppend = async () => {
         if (!rootDir) {
@@ -86,8 +86,7 @@ const PromptManager: React.FC = () => {
 
             // Replace <specs> with cached specs
             if (reconstructedPrompt.includes('<specs>')) {
-                const specs = localStorage.getItem('specs') || '';
-                reconstructedPrompt = reconstructedPrompt.replace(/<specs>/g, specs);
+                reconstructedPrompt = reconstructedPrompt.replace(/<specs>/g, specs || '');
             }
 
             // Save using File System Access API
@@ -146,8 +145,7 @@ const PromptManager: React.FC = () => {
 
             // Replace <specs> with cached specs
             if (reconstructedPrompt.includes('<specs>')) {
-                const specs = localStorage.getItem('specs') || '';
-                reconstructedPrompt = reconstructedPrompt.replace(/<specs>/g, specs);
+                reconstructedPrompt = reconstructedPrompt.replace(/<specs>/g, specs || '');
             }
 
             fetch('http://localhost:4000/api/prompt-token-count', {
@@ -192,6 +190,7 @@ const PromptManager: React.FC = () => {
                     {cachedTargetFileTrees && '\n# file_trees_target'}
                     {retrievedFiles && '\n# retrieved_files'}
                     {customInstructions && '\n# custom_instructions'}
+                    {specs && '\n# specs'}
                 </pre>
             </div>
 
