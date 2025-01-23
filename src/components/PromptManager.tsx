@@ -11,7 +11,8 @@ const PromptManager: React.FC = () => {
     const { 
         cachedSourceFileTrees,
         cachedTargetFileTrees,
-        retrievedFiles
+        retrievedFiles,
+        customInstructions
     } = useCacheContext();
 
     useEffect(() => {
@@ -48,8 +49,7 @@ const PromptManager: React.FC = () => {
 
         // Replace <custom_instructions> with cached custom instructions
         if (reconstructedPrompt.includes('<custom_instructions>')) {
-            const customInstructions = localStorage.getItem('customInstructions') || '';
-            reconstructedPrompt = reconstructedPrompt.replace(/<custom_instructions>/g, customInstructions);
+            reconstructedPrompt = reconstructedPrompt.replace(/<custom_instructions>/g, customInstructions || '');
         }
 
         // Replace <specs> with cached specs
@@ -59,7 +59,7 @@ const PromptManager: React.FC = () => {
         }
 
         setPreviewContent(reconstructedPrompt);
-    }, [composition, cachedSourceFileTrees, cachedTargetFileTrees, retrievedFiles]);
+    }, [composition, cachedSourceFileTrees, cachedTargetFileTrees, retrievedFiles, customInstructions]);
 
     const handleAppend = async () => {
         if (!rootDir) {
@@ -81,8 +81,7 @@ const PromptManager: React.FC = () => {
 
             // Replace <custom_instructions> with cached custom instructions
             if (reconstructedPrompt.includes('<custom_instructions>')) {
-                const customInstructions = localStorage.getItem('customInstructions') || '';
-                reconstructedPrompt = reconstructedPrompt.replace(/<custom_instructions>/g, customInstructions);
+                reconstructedPrompt = reconstructedPrompt.replace(/<custom_instructions>/g, customInstructions || '');
             }
 
             // Replace <specs> with cached specs
@@ -142,8 +141,7 @@ const PromptManager: React.FC = () => {
 
             // Replace <custom_instructions> with cached custom instructions
             if (reconstructedPrompt.includes('<custom_instructions>')) {
-                const customInstructions = localStorage.getItem('customInstructions') || '';
-                reconstructedPrompt = reconstructedPrompt.replace(/<custom_instructions>/g, customInstructions);
+                reconstructedPrompt = reconstructedPrompt.replace(/<custom_instructions>/g, customInstructions || '');
             }
 
             // Replace <specs> with cached specs
@@ -193,6 +191,7 @@ const PromptManager: React.FC = () => {
                     {cachedSourceFileTrees && '# file_trees_source'}
                     {cachedTargetFileTrees && '\n# file_trees_target'}
                     {retrievedFiles && '\n# retrieved_files'}
+                    {customInstructions && '\n# custom_instructions'}
                 </pre>
             </div>
 

@@ -4,9 +4,11 @@ interface CacheContextType {
     cachedSourceFileTrees: string;
     cachedTargetFileTrees: string;
     retrievedFiles: string;
+    customInstructions: string;
     setCachedSourceFileTrees: (content: string) => void;
     setCachedTargetFileTrees: (content: string) => void;
     setRetrievedFiles: (content: string) => void;
+    setCustomInstructions: (content: string) => void;
 }
 
 const CacheContext = createContext<CacheContextType | undefined>(undefined);
@@ -15,6 +17,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
     const [cachedSourceFileTrees, setCachedSourceFileTrees] = useState('');
     const [cachedTargetFileTrees, setCachedTargetFileTrees] = useState('');
     const [retrievedFiles, setRetrievedFiles] = useState('');
+    const [customInstructions, setCustomInstructions] = useState('');
 
     return (
         <CacheContext.Provider value={{ 
@@ -23,7 +26,9 @@ export function CacheProvider({ children }: { children: ReactNode }) {
             cachedTargetFileTrees, 
             setCachedTargetFileTrees,
             retrievedFiles,
-            setRetrievedFiles
+            setRetrievedFiles,
+            customInstructions,
+            setCustomInstructions
         }}>
             {children}
         </CacheContext.Provider>

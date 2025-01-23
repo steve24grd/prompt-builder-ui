@@ -13,7 +13,9 @@ const CustomInstructionBox: React.FC = () => {
     cachedSourceFileTrees, 
     setCachedSourceFileTrees,
     cachedTargetFileTrees,
-    setCachedTargetFileTrees 
+    setCachedTargetFileTrees,
+    customInstructions,
+    setCustomInstructions
   } = useCacheContext();
 
   const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -67,22 +69,9 @@ const CustomInstructionBox: React.FC = () => {
     const content = instructionType === 'file' ? fileContent : newInstruction;
     
     if (checked && content) {
-      // Add to both source and target contexts
-      const sourceContent = cachedSourceFileTrees;
-      const targetContent = cachedTargetFileTrees + '\n\n# Custom Instructions\n' + content;
-      setCachedSourceFileTrees(sourceContent);
-      setCachedTargetFileTrees(targetContent);
+      setCustomInstructions(content);
     } else if (!checked) {
-      // Remove from both source and target contexts
-      const removeCustomInstructions = (content: string) => {
-        const sections = content.split('\n\n# ');
-        const filteredSections = sections.filter((section: string) => !section.startsWith('Custom Instructions\n'));
-        const newContent = filteredSections.join('\n\n# ').trim();
-        return newContent === '' ? '' : sections[0] === newContent ? newContent : '# ' + newContent;
-      };
-
-      setCachedSourceFileTrees(removeCustomInstructions(cachedSourceFileTrees));
-      setCachedTargetFileTrees(removeCustomInstructions(cachedTargetFileTrees));
+      setCustomInstructions('');
     }
   };
 
